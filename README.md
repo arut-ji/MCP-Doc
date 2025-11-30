@@ -15,11 +15,20 @@ A Docx document processing service based on the FastMCP library, supporting the 
 
 ## Installation Dependencies
 
-Ensure Python 3.10+ is installed, then install the following dependencies:
+Ensure Python 3.10+ is installed, then install `uv` if you haven't already:
 
 ```bash
-pip3 install python-docx mcp
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
+
+Then install the project dependencies:
+
+```bash
+uv sync
+```
+
+This will create a virtual environment and install all required dependencies automatically.
 
 ## Usage
 
@@ -31,7 +40,7 @@ pip3 install python-docx mcp
 4. Fill in the following information:
    - Name: MCP_DOCX
    - Type: Command
-   - Command: `python3 /path/to/MCP_dox/server.py` (replace with the actual path to your `server.py`)
+   - Command: `uv run python /path/to/MCP-Doc/server.py` (replace with the actual path to your `server.py`)
 5. Click `Add` to add the service
 
 After adding, you can use natural language to operate Word documents in Cursor's AI assistant, for example:
@@ -81,15 +90,16 @@ The service has good typography understanding capabilities:
 If you encounter problems in Cursor, try the following steps:
 
 1. Ensure Python 3.10+ is correctly installed
-2. Ensure the python-docx and mcp libraries are correctly installed
+2. Ensure `uv` is installed and dependencies are synced (`uv sync`)
 3. Check if the server path is correct
 4. Restart the Cursor application
 
 ## Notes
 
-- Ensure the python-docx and mcp libraries are correctly installed
+- Dependencies are managed with `uv` - run `uv sync` to install/update dependencies
 - Ensure Chinese characters in paths can be correctly processed
 - Using absolute paths can avoid path parsing issues
+- The virtual environment is automatically managed by `uv` in the `.venv` directory
 
 ## License
 
