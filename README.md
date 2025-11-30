@@ -30,6 +30,24 @@ uv sync
 
 This will create a virtual environment and install all required dependencies automatically.
 
+### Installing as a Local Python Tool
+
+You can install this package as a local Python tool using `uv`, which will make the `mcp-doc` command available system-wide:
+
+```bash
+# Install as a local tool
+uv tool install .
+
+# Verify installation
+mcp-doc --help
+```
+
+After installation, you can use `mcp-doc` directly from anywhere in your terminal. To uninstall:
+
+```bash
+uv tool uninstall mcp-doc
+```
+
 ## Usage
 
 ### Using as an MCP Service in Cursor
@@ -40,7 +58,9 @@ This will create a virtual environment and install all required dependencies aut
 4. Fill in the following information:
    - Name: MCP_DOCX
    - Type: Command
-   - Command: `uv run python /path/to/MCP-Doc/server.py` (replace with the actual path to your `server.py`)
+   - Command: 
+     - If installed as a tool: `mcp-doc`
+     - Otherwise: `uv run python /path/to/MCP-Doc/server.py` (replace with the actual path to your `server.py`)
 5. Click `Add` to add the service
 
 After adding, you can use natural language to operate Word documents in Cursor's AI assistant, for example:
