@@ -25,7 +25,7 @@ from typing import (
     Union,
 )
 
-from mcp.server.fastmcp import FastMCP, Context
+from mcp.server.fastmcp import FastMCP
 from docx import Document
 
 # Type aliases for better type checking
@@ -221,7 +221,7 @@ mcp = FastMCP(
 )
 
 @mcp.tool()
-def create_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-arg]
+def create_document(file_path: str) -> str:
     """
     Create a new Word document
     
@@ -243,7 +243,7 @@ def create_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-
         return error_msg
 
 @mcp.tool()
-def open_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-arg]
+def open_document(file_path: str) -> str:
     """
     Open an existing Word document
     
@@ -265,7 +265,7 @@ def open_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-ar
         return error_msg
 
 @mcp.tool()
-def save_document(_ctx: Context) -> str:  # type: ignore[type-arg]
+def save_document() -> str:
     """
     Save the currently open Word document to the original file (update the original file)
     """
@@ -287,7 +287,6 @@ def save_document(_ctx: Context) -> str:  # type: ignore[type-arg]
 
 @mcp.tool()
 def add_paragraph(
-    _ctx: Context,  # type: ignore[type-arg]
     text: str, 
     bold: bool = False, 
     italic: bool = False, 
@@ -359,7 +358,7 @@ def add_paragraph(
         return error_msg
 
 @mcp.tool()
-def add_heading(_ctx: Context, text: str, level: int)  -> str:  # type: ignore[type-arg]
+def add_heading(text: str, level: int) -> str:
     """
     Add heading to document
     
@@ -380,7 +379,7 @@ def add_heading(_ctx: Context, text: str, level: int)  -> str:  # type: ignore[t
         return error_msg
 
 @mcp.tool()
-def add_table(_ctx: Context, rows: int, cols: int, data: Optional[List[List[str]]] = None)  -> str:  # type: ignore[type-arg]
+def add_table(rows: int, cols: int, data: Optional[List[List[str]]] = None) -> str:
     """
     Add table to document
     
@@ -411,7 +410,7 @@ def add_table(_ctx: Context, rows: int, cols: int, data: Optional[List[List[str]
         return error_msg
 
 @mcp.tool()
-def get_document_info(_ctx: Context) -> str:  # type: ignore[type-arg]
+def get_document_info() -> str:
     """
     Get document information, including paragraph count, table count, styles, etc.
     """
@@ -446,7 +445,7 @@ def get_document_info(_ctx: Context) -> str:  # type: ignore[type-arg]
         return error_msg
 
 @mcp.tool()
-def search_text(_ctx: Context, keyword: str)  -> str:  # type: ignore[type-arg]
+def search_text(keyword: str) -> str:
     """
     Search for text in the document
     
@@ -507,7 +506,7 @@ def search_text(_ctx: Context, keyword: str)  -> str:  # type: ignore[type-arg]
         return error_msg
 
 @mcp.tool()
-def search_and_replace(_ctx: Context, keyword: str, replace_with: str, preview_only: bool = False)  -> str:  # type: ignore[type-arg]
+def search_and_replace(keyword: str, replace_with: str, preview_only: bool = False) -> str:
     """
     Search and replace text in the document, providing detailed replacement information and preview options
     
@@ -610,7 +609,7 @@ def search_and_replace(_ctx: Context, keyword: str, replace_with: str, preview_o
         return error_msg
 
 @mcp.tool()
-def find_and_replace(_ctx: Context, find_text: str, replace_text: str)  -> str:  # type: ignore[type-arg]
+def find_and_replace(find_text: str, replace_text: str) -> str:
     """
     Find and replace text in the document
     
@@ -648,7 +647,6 @@ def find_and_replace(_ctx: Context, find_text: str, replace_text: str)  -> str: 
 
 @mcp.tool()
 def merge_table_cells(
-    _ctx: Context,  # type: ignore[type-arg]
     table_index: int,
     start_row: int,
     start_col: int,
@@ -706,7 +704,7 @@ def merge_table_cells(
         return error_msg
 
 @mcp.tool()
-def split_table(_ctx: Context, table_index: int, row_index: int)  -> str:  # type: ignore[type-arg]
+def split_table(table_index: int, row_index: int) -> str:
     """
     Split table into two tables at specified row
     
@@ -764,7 +762,7 @@ def split_table(_ctx: Context, table_index: int, row_index: int)  -> str:  # typ
         return error_msg
 
 @mcp.tool()
-def add_table_row(_ctx: Context, table_index: int, data: Optional[List[str]] = None)  -> str:  # type: ignore[type-arg]
+def add_table_row(table_index: int, data: Optional[List[str]] = None) -> str:
     """
     Add a row to table
     
@@ -802,7 +800,7 @@ def add_table_row(_ctx: Context, table_index: int, data: Optional[List[str]] = N
         return error_msg
 
 @mcp.tool()
-def delete_table_row(_ctx: Context, table_index: int, row_index: int)  -> str:  # type: ignore[type-arg]
+def delete_table_row(table_index: int, row_index: int) -> str:
     """
     Delete a row from table
     
@@ -838,7 +836,7 @@ def delete_table_row(_ctx: Context, table_index: int, row_index: int)  -> str:  
         return error_msg
 
 @mcp.tool()
-def edit_table_cell(_ctx: Context, table_index: int, row_index: int, col_index: int, text: str)  -> str:  # type: ignore[type-arg]
+def edit_table_cell(table_index: int, row_index: int, col_index: int, text: str) -> str:
     """
     Edit table cell content
     
@@ -878,7 +876,7 @@ def edit_table_cell(_ctx: Context, table_index: int, row_index: int, col_index: 
         return error_msg
 
 @mcp.tool()
-def add_page_break(_ctx: Context) -> str:  # type: ignore[type-arg]
+def add_page_break() -> str:
     """
     Add page break
     """
@@ -896,7 +894,6 @@ def add_page_break(_ctx: Context) -> str:  # type: ignore[type-arg]
 
 @mcp.tool()
 def set_page_margins(
-    _ctx: Context,  # type: ignore[type-arg]
     top: Optional[float] = None,
     bottom: Optional[float] = None,
     left: Optional[float] = None,
@@ -937,7 +934,7 @@ def set_page_margins(
         return error_msg
 
 @mcp.tool()
-def delete_paragraph(_ctx: Context, paragraph_index: int)  -> str:  # type: ignore[type-arg]
+def delete_paragraph(paragraph_index: int) -> str:
     """
     Delete specified paragraph from document
     
@@ -968,7 +965,7 @@ def delete_paragraph(_ctx: Context, paragraph_index: int)  -> str:  # type: igno
         return error_msg
 
 @mcp.tool()
-def delete_text(_ctx: Context, paragraph_index: int, start_pos: int, end_pos: int)  -> str:  # type: ignore[type-arg]
+def delete_text(paragraph_index: int, start_pos: int, end_pos: int) -> str:
     """
     Delete specified text from paragraph
     
@@ -1006,7 +1003,7 @@ def delete_text(_ctx: Context, paragraph_index: int, start_pos: int, end_pos: in
         return error_msg
 
 @mcp.tool()
-def save_as_document(_ctx: Context, new_file_path: str)  -> str:  # type: ignore[type-arg]
+def save_as_document(new_file_path: str) -> str:
     """
     Save current document as a new file
     
@@ -1031,7 +1028,7 @@ def save_as_document(_ctx: Context, new_file_path: str)  -> str:  # type: ignore
         return error_msg
 
 @mcp.tool()
-def create_document_copy(_ctx: Context, suffix: str = "-副本")  -> str:  # type: ignore[type-arg]
+def create_document_copy(suffix: str = "-副本") -> str:
     """
     Create a copy of the current document in the directory of the original file
     
@@ -1064,7 +1061,7 @@ def create_document_copy(_ctx: Context, suffix: str = "-副本")  -> str:  # typ
         return error_msg
 
 @mcp.tool()
-def replace_section(_ctx: Context, section_title: str, new_content: List[str], preserve_title: bool = True)  -> str:  # type: ignore[type-arg]
+def replace_section(section_title: str, new_content: List[str], preserve_title: bool = True) -> str:
     """
     Find specified title in document and replace content under that title, keeping original position, format, and style
     
@@ -1206,7 +1203,7 @@ def replace_section(_ctx: Context, section_title: str, new_content: List[str], p
         return error_msg
 
 @mcp.tool()
-def edit_section_by_keyword(_ctx: Context, keyword: str, new_content: List[str], section_range: int = 3)  -> str:  # type: ignore[type-arg]
+def edit_section_by_keyword(keyword: str, new_content: List[str], section_range: int = 3) -> str:
     """
     Find paragraphs containing specified keyword and replace them and their surrounding content, keeping original position, format, and style
     
