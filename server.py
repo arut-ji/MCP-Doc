@@ -7,17 +7,32 @@ Provides various operations for docx documents, including querying, adding, modi
 Implemented using the official MCP library
 """
 
+from __future__ import annotations
+
 import os
 import tempfile
 import logging
 import traceback
 from contextlib import asynccontextmanager
-from typing import AsyncIterator, Dict, Any, Optional
+from typing import (
+    AsyncIterator,
+    Dict,
+    Any,
+    Optional,
+    List,
+    Literal,
+    TypedDict,
+    Union,
+)
 
 from mcp.server.fastmcp import FastMCP, Context
 from docx import Document
-from docx.shared import Pt, RGBColor, Inches, Cm
-from docx.enum.text import WD_PARAGRAPH_ALIGNMENT, WD_LINE_SPACING, WD_BREAK
+
+# Type aliases for better type checking
+# Document from docx has incomplete type stubs
+DocumentType = Any  # docx.Document has incomplete type stubs
+from docx.shared import Pt, RGBColor, Cm
+from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 from docx.enum.style import WD_STYLE_TYPE
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
@@ -36,18 +51,79 @@ logger = logging.getLogger("DocxMCPServer")
 # Create a state file for restoring state when MCP service restarts
 CURRENT_DOC_FILE = os.path.join(tempfile.gettempdir(), "docx_mcp_current_doc.txt")
 
+
+# TypedDict definitions for structured data
+class RunInfo(TypedDict, total=False):
+    """Type definition for run formatting information"""
+    bold: Optional[bool]
+    italic: Optional[bool]
+    underline: Optional[bool]
+    font_size: Optional[Any]  # Pt type from docx.shared
+    font_name: Optional[str]
+    color: Optional[RGBColor]
+
+
+class StyleInfo(TypedDict, total=False):
+    """Type definition for paragraph style information"""
+    style: Optional[Any]  # docx style object
+    alignment: Optional[Any]  # WD_PARAGRAPH_ALIGNMENT enum
+    runs: List[RunInfo]
+
+
+class SearchResultParagraph(TypedDict):
+    """Type definition for paragraph search result"""
+    type: Literal["paragraph"]
+    index: int
+    text: str
+
+
+class SearchResultTableCell(TypedDict):
+    """Type definition for table cell search result"""
+    type: Literal["table cell"]
+    table_index: int
+    row: int
+    column: int
+    text: str
+
+
+SearchResult = Union[SearchResultParagraph, SearchResultTableCell]
+
+
+class ReplaceResultParagraph(TypedDict):
+    """Type definition for paragraph replace result"""
+    type: Literal["paragraph"]
+    index: int
+    original: str
+    replaced: str
+    count: int
+
+
+class ReplaceResultTableCell(TypedDict):
+    """Type definition for table cell replace result"""
+    type: Literal["table cell"]
+    table_index: int
+    row: int
+    column: int
+    original: str
+    replaced: str
+    count: int
+
+
+ReplaceResult = Union[ReplaceResultParagraph, ReplaceResultTableCell]
+
+
 class DocxProcessor:
     """Class for processing Docx documents, implementing various document operations"""
     
-    def __init__(self):
-        self.documents = {}  # Store opened documents
-        self.current_document = None
-        self.current_file_path = None
+    def __init__(self) -> None:
+        self.documents: Dict[str, DocumentType] = {}  # Store opened documents
+        self.current_document: Optional[DocumentType] = None
+        self.current_file_path: Optional[str] = None
         
         # Try to load current document from state file
         self._load_current_document()
     
-    def _load_current_document(self):
+    def _load_current_document(self) -> bool:
         """Load current document from state file"""
         if not os.path.exists(CURRENT_DOC_FILE):
             return False
@@ -88,7 +164,7 @@ class DocxProcessor:
         
         return False
     
-    def _save_current_document(self):
+    def _save_current_document(self) -> bool:
         """Save current document path to state file"""
         if not self.current_file_path:
             return False
@@ -102,7 +178,7 @@ class DocxProcessor:
         
         return False
     
-    def save_state(self):
+    def save_state(self) -> None:
         """Save processor state"""
         # Save current document
         if self.current_document and self.current_file_path:
@@ -112,7 +188,7 @@ class DocxProcessor:
             except Exception as e:
                 logger.error(f"Failed to save current document: {e}")
     
-    def load_state(self):
+    def load_state(self) -> None:
         """Load processor state"""
         self._load_current_document()
 
@@ -145,7 +221,7 @@ mcp = FastMCP(
 )
 
 @mcp.tool()
-def create_document(ctx: Context, file_path: str) -> str:
+def create_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-arg]
     """
     Create a new Word document
     
@@ -167,7 +243,7 @@ def create_document(ctx: Context, file_path: str) -> str:
         return error_msg
 
 @mcp.tool()
-def open_document(ctx: Context, file_path: str) -> str:
+def open_document(_ctx: Context, file_path: str) -> str:  # type: ignore[type-arg]
     """
     Open an existing Word document
     
@@ -189,7 +265,7 @@ def open_document(ctx: Context, file_path: str) -> str:
         return error_msg
 
 @mcp.tool()
-def save_document(ctx: Context) -> str:
+def save_document(_ctx: Context) -> str:  # type: ignore[type-arg]
     """
     Save the currently open Word document to the original file (update the original file)
     """
@@ -211,7 +287,7 @@ def save_document(ctx: Context) -> str:
 
 @mcp.tool()
 def add_paragraph(
-    ctx: Context, 
+    _ctx: Context,  # type: ignore[type-arg]
     text: str, 
     bold: bool = False, 
     italic: bool = False, 
@@ -219,7 +295,7 @@ def add_paragraph(
     font_size: Optional[int] = None,
     font_name: Optional[str] = None,
     color: Optional[str] = None,
-    alignment: Optional[str] = None
+    alignment: Optional[Literal["left", "center", "right", "justify"]] = None
 ) -> str:
     """
     Add paragraph text to document
@@ -283,7 +359,7 @@ def add_paragraph(
         return error_msg
 
 @mcp.tool()
-def add_heading(ctx: Context, text: str, level: int) -> str:
+def add_heading(_ctx: Context, text: str, level: int)  -> str:  # type: ignore[type-arg]
     """
     Add heading to document
     
@@ -304,7 +380,7 @@ def add_heading(ctx: Context, text: str, level: int) -> str:
         return error_msg
 
 @mcp.tool()
-def add_table(ctx: Context, rows: int, cols: int, data: Optional[list] = None) -> str:
+def add_table(_ctx: Context, rows: int, cols: int, data: Optional[List[List[str]]] = None)  -> str:  # type: ignore[type-arg]
     """
     Add table to document
     
@@ -335,7 +411,7 @@ def add_table(ctx: Context, rows: int, cols: int, data: Optional[list] = None) -
         return error_msg
 
 @mcp.tool()
-def get_document_info(ctx: Context) -> str:
+def get_document_info(_ctx: Context) -> str:  # type: ignore[type-arg]
     """
     Get document information, including paragraph count, table count, styles, etc.
     """
@@ -370,7 +446,7 @@ def get_document_info(ctx: Context) -> str:
         return error_msg
 
 @mcp.tool()
-def search_text(ctx: Context, keyword: str) -> str:
+def search_text(_ctx: Context, keyword: str)  -> str:  # type: ignore[type-arg]
     """
     Search for text in the document
     
@@ -431,7 +507,7 @@ def search_text(ctx: Context, keyword: str) -> str:
         return error_msg
 
 @mcp.tool()
-def search_and_replace(ctx: Context, keyword: str, replace_with: str, preview_only: bool = False) -> str:
+def search_and_replace(_ctx: Context, keyword: str, replace_with: str, preview_only: bool = False)  -> str:  # type: ignore[type-arg]
     """
     Search and replace text in the document, providing detailed replacement information and preview options
     
@@ -534,7 +610,7 @@ def search_and_replace(ctx: Context, keyword: str, replace_with: str, preview_on
         return error_msg
 
 @mcp.tool()
-def find_and_replace(ctx: Context, find_text: str, replace_text: str) -> str:
+def find_and_replace(_ctx: Context, find_text: str, replace_text: str)  -> str:  # type: ignore[type-arg]
     """
     Find and replace text in the document
     
@@ -572,7 +648,7 @@ def find_and_replace(ctx: Context, find_text: str, replace_text: str) -> str:
 
 @mcp.tool()
 def merge_table_cells(
-    ctx: Context,
+    _ctx: Context,  # type: ignore[type-arg]
     table_index: int,
     start_row: int,
     start_col: int,
@@ -630,7 +706,7 @@ def merge_table_cells(
         return error_msg
 
 @mcp.tool()
-def split_table(ctx: Context, table_index: int, row_index: int) -> str:
+def split_table(_ctx: Context, table_index: int, row_index: int)  -> str:  # type: ignore[type-arg]
     """
     Split table into two tables at specified row
     
@@ -688,7 +764,7 @@ def split_table(ctx: Context, table_index: int, row_index: int) -> str:
         return error_msg
 
 @mcp.tool()
-def add_table_row(ctx: Context, table_index: int, data: Optional[list] = None) -> str:
+def add_table_row(_ctx: Context, table_index: int, data: Optional[List[str]] = None)  -> str:  # type: ignore[type-arg]
     """
     Add a row to table
     
@@ -726,7 +802,7 @@ def add_table_row(ctx: Context, table_index: int, data: Optional[list] = None) -
         return error_msg
 
 @mcp.tool()
-def delete_table_row(ctx: Context, table_index: int, row_index: int) -> str:
+def delete_table_row(_ctx: Context, table_index: int, row_index: int)  -> str:  # type: ignore[type-arg]
     """
     Delete a row from table
     
@@ -762,7 +838,7 @@ def delete_table_row(ctx: Context, table_index: int, row_index: int) -> str:
         return error_msg
 
 @mcp.tool()
-def edit_table_cell(ctx: Context, table_index: int, row_index: int, col_index: int, text: str) -> str:
+def edit_table_cell(_ctx: Context, table_index: int, row_index: int, col_index: int, text: str)  -> str:  # type: ignore[type-arg]
     """
     Edit table cell content
     
@@ -802,7 +878,7 @@ def edit_table_cell(ctx: Context, table_index: int, row_index: int, col_index: i
         return error_msg
 
 @mcp.tool()
-def add_page_break(ctx: Context) -> str:
+def add_page_break(_ctx: Context) -> str:  # type: ignore[type-arg]
     """
     Add page break
     """
@@ -820,7 +896,7 @@ def add_page_break(ctx: Context) -> str:
 
 @mcp.tool()
 def set_page_margins(
-    ctx: Context,
+    _ctx: Context,  # type: ignore[type-arg]
     top: Optional[float] = None,
     bottom: Optional[float] = None,
     left: Optional[float] = None,
@@ -861,7 +937,7 @@ def set_page_margins(
         return error_msg
 
 @mcp.tool()
-def delete_paragraph(ctx: Context, paragraph_index: int) -> str:
+def delete_paragraph(_ctx: Context, paragraph_index: int)  -> str:  # type: ignore[type-arg]
     """
     Delete specified paragraph from document
     
@@ -892,7 +968,7 @@ def delete_paragraph(ctx: Context, paragraph_index: int) -> str:
         return error_msg
 
 @mcp.tool()
-def delete_text(ctx: Context, paragraph_index: int, start_pos: int, end_pos: int) -> str:
+def delete_text(_ctx: Context, paragraph_index: int, start_pos: int, end_pos: int)  -> str:  # type: ignore[type-arg]
     """
     Delete specified text from paragraph
     
@@ -930,7 +1006,7 @@ def delete_text(ctx: Context, paragraph_index: int, start_pos: int, end_pos: int
         return error_msg
 
 @mcp.tool()
-def save_as_document(ctx: Context, new_file_path: str) -> str:
+def save_as_document(_ctx: Context, new_file_path: str)  -> str:  # type: ignore[type-arg]
     """
     Save current document as a new file
     
@@ -955,7 +1031,7 @@ def save_as_document(ctx: Context, new_file_path: str) -> str:
         return error_msg
 
 @mcp.tool()
-def create_document_copy(ctx: Context, suffix: str = "-副本") -> str:
+def create_document_copy(_ctx: Context, suffix: str = "-副本")  -> str:  # type: ignore[type-arg]
     """
     Create a copy of the current document in the directory of the original file
     
@@ -988,7 +1064,7 @@ def create_document_copy(ctx: Context, suffix: str = "-副本") -> str:
         return error_msg
 
 @mcp.tool()
-def replace_section(ctx: Context, section_title: str, new_content: list, preserve_title: bool = True) -> str:
+def replace_section(_ctx: Context, section_title: str, new_content: List[str], preserve_title: bool = True)  -> str:  # type: ignore[type-arg]
     """
     Find specified title in document and replace content under that title, keeping original position, format, and style
     
@@ -1130,7 +1206,7 @@ def replace_section(ctx: Context, section_title: str, new_content: list, preserv
         return error_msg
 
 @mcp.tool()
-def edit_section_by_keyword(ctx: Context, keyword: str, new_content: list, section_range: int = 3) -> str:
+def edit_section_by_keyword(_ctx: Context, keyword: str, new_content: List[str], section_range: int = 3)  -> str:  # type: ignore[type-arg]
     """
     Find paragraphs containing specified keyword and replace them and their surrounding content, keeping original position, format, and style
     
