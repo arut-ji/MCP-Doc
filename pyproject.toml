@@ -8,3 +8,8 @@ dependencies = [
     "mcp",
 ]
 
+[dependency-groups]
+dev = [
+    "mypy>=1.19.0",
+]
+
