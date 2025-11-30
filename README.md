@@ -13,29 +13,17 @@ A Docx document processing service based on the FastMCP library, supporting the 
 - **Convenient Editing**: Support for find and replace functionality
 - **Section Editing**: Support for replacing content in specific sections while preserving original formatting and styles
 
-## Installation Dependencies
+## Installation
 
-Ensure Python 3.10+ is installed, then install `uv` if you haven't already:
+### For End Users (Recommended)
+
+Install as a local Python tool using `uv`. This will automatically install all dependencies and make the `mcp-doc` command available system-wide:
 
 ```bash
 # Install uv (if not already installed)
 curl -LsSf https://astral.sh/uv/install.sh | sh
-```
 
-Then install the project dependencies:
-
-```bash
-uv sync
-```
-
-This will create a virtual environment and install all required dependencies automatically.
-
-### Installing as a Local Python Tool
-
-You can install this package as a local Python tool using `uv`, which will make the `mcp-doc` command available system-wide:
-
-```bash
-# Install as a local tool
+# Install mcp-doc as a local tool (dependencies are installed automatically)
 uv tool install .
 
 # Verify installation
@@ -48,6 +36,24 @@ After installation, you can use `mcp-doc` directly from anywhere in your termina
 uv tool uninstall mcp-doc
 ```
 
+### For Developers
+
+If you're developing or modifying the code, install dependencies for local development:
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install project dependencies
+uv sync
+```
+
+This will create a virtual environment and install all required dependencies automatically. You can then run the server directly:
+
+```bash
+uv run python server.py
+```
+
 ## Usage
 
 ### Using as an MCP Service in Cursor
@@ -58,7 +64,7 @@ uv tool uninstall mcp-doc
 4. Fill in the following information:
    - Name: MCP_DOCX
    - Type: Command
-   - Command: 
+   - Command:
      - If installed as a tool: `mcp-doc`
      - Otherwise: `uv run python /path/to/MCP-Doc/server.py` (replace with the actual path to your `server.py`)
 5. Click `Add` to add the service
@@ -110,16 +116,18 @@ The service has good typography understanding capabilities:
 If you encounter problems in Cursor, try the following steps:
 
 1. Ensure Python 3.10+ is correctly installed
-2. Ensure `uv` is installed and dependencies are synced (`uv sync`)
-3. Check if the server path is correct
-4. Restart the Cursor application
+2. If using `mcp-doc` command: Ensure it's installed (`uv tool install .`) and verify with `mcp-doc --help`
+3. If using direct path: Ensure `uv` is installed and dependencies are synced (`uv sync`)
+4. Check if the server path/command is correct in Cursor's MCP settings
+5. Restart the Cursor application
 
 ## Notes
 
-- Dependencies are managed with `uv` - run `uv sync` to install/update dependencies
+- When installed as a tool (`uv tool install .`), dependencies are automatically managed
+- For local development, dependencies are managed with `uv` - run `uv sync` to install/update dependencies
 - Ensure Chinese characters in paths can be correctly processed
 - Using absolute paths can avoid path parsing issues
-- The virtual environment is automatically managed by `uv` in the `.venv` directory
+- The virtual environment is automatically managed by `uv` in the `.venv` directory (for local development)
 
 ## License
 
