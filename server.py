@@ -1344,7 +1344,8 @@ def edit_section_by_keyword(_ctx: Context, keyword: str, new_content: List[str],
 
 # Add more tools...
 
-if __name__ == "__main__":
+def main() -> None:
+    """Main entry point for the MCP server."""
     # Always start with a clean state, don't try to load any previous document
     if os.path.exists(CURRENT_DOC_FILE):
         try:
@@ -1354,4 +1355,7 @@ if __name__ == "__main__":
             logger.error(f"Failed to remove existing state file: {e}")
     
     # Run MCP server
-    mcp.run() 
+    mcp.run()
+
+if __name__ == "__main__":
+    main() 
